@@ -21,6 +21,7 @@ const getAsync = promisify(redisClient.get).bind(redisClient);
 const setAsync = promisify(redisClient.set).bind(redisClient);
 const delAsync = promisify(redisClient.del).bind(redisClient);
 const keysAsync = promisify(redisClient.keys).bind(redisClient);
+const flushallAsync = promisify(redisClient.flushAll).bind(redisClient);
 
 interface Coin {
     id:string;
@@ -77,8 +78,9 @@ app.get('/api/coins/:room', async (_req, res) => {
 io.on('connection', (socket) => {
   console.log(`Cliente conectado: ${socket.id}`);
 
-  socket.on('disconnect', () => {
+  socket.on('disconnect', async () => {
     console.log(`Cliente desconectado: ${socket.id}`);
+    await flushallAsync();
   });
 
   socket.on('coinCollected', async (coinId) => {

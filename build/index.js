@@ -54,6 +54,7 @@ const getAsync = (0, util_1.promisify)(redisClient.get).bind(redisClient);
 const setAsync = (0, util_1.promisify)(redisClient.set).bind(redisClient);
 const delAsync = (0, util_1.promisify)(redisClient.del).bind(redisClient);
 const keysAsync = (0, util_1.promisify)(redisClient.keys).bind(redisClient);
+const flushallAsync = (0, util_1.promisify)(redisClient.flushAll).bind(redisClient);
 const generateRandomPosition = (area, room) => {
     const x = Math.random() * (area.xmax - area.xmin) + area.xmin;
     const y = Math.random() * (area.ymax - area.ymin) + area.ymin;
@@ -80,9 +81,10 @@ app.get('/api/coins/:room', (_req, res) => __awaiter(void 0, void 0, void 0, fun
 // Conexión y manejo de sockets
 io.on('connection', (socket) => {
     console.log(`Cliente conectado: ${socket.id}`);
-    socket.on('disconnect', () => {
+    socket.on('disconnect', () => __awaiter(void 0, void 0, void 0, function* () {
         console.log(`Cliente desconectado: ${socket.id}`);
-    });
+        yield flushallAsync();
+    }));
     socket.on('coinCollected', (coinId) => __awaiter(void 0, void 0, void 0, function* () {
         const coin = yield getAsync(coinId);
         if (coin) {
